@@ -14,13 +14,13 @@ import 'search_view_model_test.mocks.dart';
 void main() {
   final mockUseCase = MockSearchUseCase();
 
-  group("検索中のloading状態を確認", () {
+  group("Check loading-state while running search", () {
     setUp(() {
-      // verifyでモック呼び出しを確認するまえに落ちるテストケースがあるので
-      // 他テストケースに影響しないよう毎回リセットする
+      // Some tests fail before verifying call of the mocked useCase.
+      // The mocked should be reset everytime, so that other tests not affected.
       reset(mockUseCase);
     });
-    test("失敗1", () async {
+    test("Failure 1", () async {
       final viewModel = SearchViewModel(mockUseCase);
       expect(viewModel.debugState, isA<SearchStateEmpty>());
       when(mockUseCase.call()).thenAnswer((_) async {
@@ -28,12 +28,26 @@ void main() {
       });
 
       await viewModel.search("keyword");
-      expect(viewModel.debugState, isA<SearchStateLoading>());
+      // Search operation has be done and the current is data-state, not loading
+      expect(viewModel.debugState, isA<SearchStateLoading>()); // Error
 
       verify(mockUseCase.call()).called(1);
       expect(viewModel.debugState, isA<SearchStateData>());
     });
-    test("失敗2", () async {
+    test("Failure 2", () async {
+      final viewModel = SearchViewModel(mockUseCase);
+      when(mockUseCase.call()).thenAnswer((_) async {
+        return ["result1", "result2"];
+      });
+
+      viewModel.search("keyword");
+      expect(viewModel.debugState, isA<SearchStateLoading>()); // OK
+
+      verify(mockUseCase.call()).called(1);
+      // Search operation has NOT done yet and the current is still loading-state.
+      expect(viewModel.debugState, isA<SearchStateData>()); // Error
+    });
+    test("Ambiguous Delay", () async {
       final viewModel = SearchViewModel(mockUseCase);
       when(mockUseCase.call()).thenAnswer((_) async {
         return ["result1", "result2"];
@@ -42,26 +56,16 @@ void main() {
       viewModel.search("keyword");
       expect(viewModel.debugState, isA<SearchStateLoading>());
 
-      verify(mockUseCase.call()).called(1);
-      expect(viewModel.debugState, isA<SearchStateData>());
-    });
-    test("怪しい非同期処理のテスト", () async {
-      final viewModel = SearchViewModel(mockUseCase);
-      when(mockUseCase.call()).thenAnswer((_) async {
-        return ["result1", "result2"];
-      });
-
-      viewModel.search("keyword");
-      expect(viewModel.debugState, isA<SearchStateLoading>());
-
+      // Insert delay so that search operation has done before verifying
       await Future<void>.delayed(const Duration(milliseconds: 100));
       verify(mockUseCase.call()).called(1);
       expect(viewModel.debugState, isA<SearchStateData>());
     });
-    test("非同期処理を正しく待機する1", () async {
+    test("Wait for Async Operation 1", () async {
       final viewModel = SearchViewModel(mockUseCase);
       final searchCompleter = Completer<List<String>>();
       when(mockUseCase.call()).thenAnswer(
+        // calling this will NOT return until the completer has been completed
         (_) => searchCompleter.future,
       );
 
@@ -81,7 +85,7 @@ void main() {
       expect(state.keyword, "keyword");
       expect(state.hits, ["result1", "result2"]);
     });
-    test("非同期処理を正しく待機する2", () async {
+    test("Wait for Async Operation 2", () async {
       final viewModel = SearchViewModel(mockUseCase);
       when(mockUseCase.call()).thenAnswer((_) async {
         return ["result1", "result2"];
@@ -91,7 +95,7 @@ void main() {
       viewModel.search("keyword");
       expect(viewModel.debugState, isA<SearchStateLoading>());
 
-      // wait
+      // wait until data-state is received from StateNotifier#stream
       await viewModel.waitUntil<SearchStateData>();
 
       // verify
@@ -102,7 +106,7 @@ void main() {
       expect(state.keyword, "keyword");
       expect(state.hits, ["result1", "result2"]);
     });
-    test("streamを監視する（失敗）", () async {
+    test("Watch Stream (Failure)", () async {
       final viewModel = SearchViewModel(mockUseCase);
       when(mockUseCase.call()).thenAnswer((_) async {
         return ["result1", "result2"];
@@ -115,6 +119,9 @@ void main() {
       // test
       await viewModel.search("keyword");
 
+      // At this moment, data-state not received in the listener yet.
+      // To verify all the state changes, it's needed to wait for a while.
+      // If any of the following comment-outed lines toggled, this test will pass.
       // await Future<void>.delayed(const Duration(milliseconds: 100));
       // await Future.microtask(() => null);
 
@@ -125,7 +132,7 @@ void main() {
         listener.call(argThat(isA<SearchStateData>())),
       ]);
     });
-    test("streamを監視する", () async {
+    test("Watch Stream", () async {
       final viewModel = SearchViewModel(mockUseCase);
       when(mockUseCase.call()).thenAnswer((_) async {
         return ["result1", "result2"];
@@ -137,6 +144,7 @@ void main() {
 
       // test
       viewModel.search("keyword");
+      // wait until all state changes received in the listener
       await viewModel.waitUntil<SearchStateData>();
 
       // verify
