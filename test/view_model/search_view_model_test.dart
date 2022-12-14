@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:async_test_sample/model/search_usecase.dart';
+import 'package:async_test_sample/domain/usecase/search_usecase.dart';
 import 'package:async_test_sample/ui/search/search_state.dart';
 import 'package:async_test_sample/ui/search/search_view_model.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,7 +23,7 @@ void main() {
     test("Failure 1", () async {
       final viewModel = SearchViewModel(mockUseCase);
       expect(viewModel.debugState, isA<SearchStateEmpty>());
-      when(mockUseCase.call()).thenAnswer((_) async {
+      when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
       });
 
@@ -31,25 +31,25 @@ void main() {
       // Search operation has be done and the current is data-state, not loading
       expect(viewModel.debugState, isA<SearchStateLoading>()); // Error
 
-      verify(mockUseCase.call()).called(1);
+      verify(mockUseCase.call("keyword")).called(1);
       expect(viewModel.debugState, isA<SearchStateData>());
     });
     test("Failure 2", () async {
       final viewModel = SearchViewModel(mockUseCase);
-      when(mockUseCase.call()).thenAnswer((_) async {
+      when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
       });
 
       viewModel.search("keyword");
       expect(viewModel.debugState, isA<SearchStateLoading>()); // OK
 
-      verify(mockUseCase.call()).called(1);
+      verify(mockUseCase.call("keyword")).called(1);
       // Search operation has NOT done yet and the current is still loading-state.
       expect(viewModel.debugState, isA<SearchStateData>()); // Error
     });
     test("Ambiguous Delay", () async {
       final viewModel = SearchViewModel(mockUseCase);
-      when(mockUseCase.call()).thenAnswer((_) async {
+      when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
       });
 
@@ -58,13 +58,13 @@ void main() {
 
       // Insert delay so that search operation has done before verifying
       await Future<void>.delayed(const Duration(milliseconds: 100));
-      verify(mockUseCase.call()).called(1);
+      verify(mockUseCase.call("keyword")).called(1);
       expect(viewModel.debugState, isA<SearchStateData>());
     });
     test("Wait for Async Operation 1", () async {
       final viewModel = SearchViewModel(mockUseCase);
       final searchCompleter = Completer<List<String>>();
-      when(mockUseCase.call()).thenAnswer(
+      when(mockUseCase.call(any)).thenAnswer(
         // calling this will NOT return until the completer has been completed
         (_) => searchCompleter.future,
       );
@@ -78,7 +78,7 @@ void main() {
       await searchCall;
 
       // verify
-      verify(mockUseCase.call()).called(1);
+      verify(mockUseCase.call("keyword")).called(1);
       final state = viewModel.debugState;
       expect(state, isA<SearchStateData>());
       state as SearchStateData;
@@ -87,7 +87,7 @@ void main() {
     });
     test("Wait for Async Operation 2", () async {
       final viewModel = SearchViewModel(mockUseCase);
-      when(mockUseCase.call()).thenAnswer((_) async {
+      when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
       });
 
@@ -99,7 +99,7 @@ void main() {
       await viewModel.waitUntil<SearchStateData>();
 
       // verify
-      verify(mockUseCase.call()).called(1);
+      verify(mockUseCase.call("keyword")).called(1);
       final state = viewModel.debugState;
       expect(state, isA<SearchStateData>());
       state as SearchStateData;
@@ -108,7 +108,7 @@ void main() {
     });
     test("Watch Stream (Failure)", () async {
       final viewModel = SearchViewModel(mockUseCase);
-      when(mockUseCase.call()).thenAnswer((_) async {
+      when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
       });
 
@@ -126,7 +126,7 @@ void main() {
       // await Future.microtask(() => null);
 
       // verify
-      verify(mockUseCase.call()).called(1);
+      verify(mockUseCase.call("keyword")).called(1);
       verifyInOrder([
         listener.call(argThat(isA<SearchStateLoading>())),
         listener.call(argThat(isA<SearchStateData>())),
@@ -134,7 +134,7 @@ void main() {
     });
     test("Watch Stream", () async {
       final viewModel = SearchViewModel(mockUseCase);
-      when(mockUseCase.call()).thenAnswer((_) async {
+      when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
       });
 
@@ -148,7 +148,7 @@ void main() {
       await viewModel.waitUntil<SearchStateData>();
 
       // verify
-      verify(mockUseCase.call()).called(1);
+      verify(mockUseCase.call("keyword")).called(1);
       verifyInOrder([
         listener.call(argThat(isA<SearchStateLoading>())),
         listener.call(
