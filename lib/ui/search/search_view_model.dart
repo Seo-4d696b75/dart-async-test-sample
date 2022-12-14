@@ -17,12 +17,25 @@ class SearchViewModel extends StateNotifier<SearchState> {
 
   Future<void> search(String keyword) async {
     final current = state;
+    // 検索中はスキップ
     if (current.isLoading) return;
-    state = SearchState.loading(keyword: keyword);
+    // 検索中の状態
+    state = current.map(
+      empty: (_) => SearchState.loading(keyword: keyword, previousHits: []),
+      data: (s) => SearchState.loading(keyword: keyword, previousHits: s.hits),
+      loading: (_) => throw AssertionError(),
+    );
     try {
+      // 検索実行
       final result = await searchWord(keyword);
-      state = SearchState.data(keyword: keyword, hits: result);
+      // 検索結果の反映
+      if (result.isEmpty) {
+        state = const SearchState.empty();
+      } else {
+        state = SearchState.data(hits: result);
+      }
     } on Exception catch (e, stack) {
+      // エラーハンドリング
       debugPrint(e.toString());
       debugPrintStack(stackTrace: stack);
       state = current;

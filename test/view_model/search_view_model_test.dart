@@ -82,7 +82,6 @@ void main() {
       final state = viewModel.debugState;
       expect(state, isA<SearchStateData>());
       state as SearchStateData;
-      expect(state.keyword, "keyword");
       expect(state.hits, ["result1", "result2"]);
     });
     test("Wait for Async Operation 2", () async {
@@ -103,7 +102,6 @@ void main() {
       final state = viewModel.debugState;
       expect(state, isA<SearchStateData>());
       state as SearchStateData;
-      expect(state.keyword, "keyword");
       expect(state.hits, ["result1", "result2"]);
     });
     test("Watch Stream (Failure)", () async {
@@ -150,14 +148,11 @@ void main() {
       // verify
       verify(mockUseCase.call("keyword")).called(1);
       verifyInOrder([
-        listener.call(argThat(isA<SearchStateLoading>())),
-        listener.call(
-          argThat(
-            isA<SearchStateData>()
-                .having((s) => s.keyword, "keyword", "keyword")
-                .having((s) => s.hits, "hits", ["result1", "result2"]),
-          ),
-        ),
+        listener.call(argThat(isA<SearchStateLoading>()
+            .having((s) => s.keyword, "keyword", "keyword")
+            .having((s) => s.previousHits.isEmpty, "previousHits", isTrue))),
+        listener.call(argThat(isA<SearchStateData>()
+            .having((s) => s.hits, "hits", ["result1", "result2"]))),
       ]);
     });
   });

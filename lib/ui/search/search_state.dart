@@ -8,10 +8,10 @@ class SearchState with _$SearchState {
 
   const factory SearchState.loading({
     required String keyword,
+    required List<String> previousHits,
   }) = SearchStateLoading;
 
   const factory SearchState.data({
-    required String keyword,
     required List<String> hits,
   }) = SearchStateData;
 
