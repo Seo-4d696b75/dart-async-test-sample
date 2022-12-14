@@ -1,3 +1,4 @@
+import 'package:async_test_sample/ui/search/search_result_list.dart';
 import 'package:async_test_sample/ui/search/search_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -14,8 +15,13 @@ class SearchPage extends ConsumerWidget {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          children: [
-            const SearchTextField(),
+          mainAxisSize: MainAxisSize.max,
+          children: const [
+            SearchTextField(),
+            SizedBox(height: 20),
+            Expanded(
+              child: SearchResultList(),
+            ),
           ],
         ),
       ),
