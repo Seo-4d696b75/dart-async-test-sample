@@ -14,4 +14,8 @@ class SearchState with _$SearchState {
     required String keyword,
     required List<String> hits,
   }) = SearchStateData;
+
+  const SearchState._();
+
+  bool get isLoading => this is SearchStateLoading;
 }
