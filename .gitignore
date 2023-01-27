@@ -48,3 +48,6 @@ app.*.map.json
 # Auto generated code
 /lib/**/*.freezed.dart
 /test/**/*.mocks.dart
+
+# fvm
+/.fvm/flutter_sdk

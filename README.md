@@ -23,17 +23,24 @@ async test samples
 
 ## Setup
 
+### 0. Install Flutter (if needed)
+
+This project uses fvm. 
+After installing, be sure to set "${projectRoot}/.fvm/flutter_sdk" to Flutter SDK path in your IDE.
+
+`fvm install`
+
 ### 1. Install dependencies
 
-`flutter pub get`
+`fvm flutter pub get`
 
 ### 2. Run Build Runner
 
-`flutter pub run build_runner build`
+`fvm flutter pub run build_runner build`
 
 ## Run Tests
 
-`flutter test`
+`fvm flutter test`
 
 Some tests fail, while others get passed. 
 [Please see test codes for more details.](./test/view_model/search_view_model_test.dart)
