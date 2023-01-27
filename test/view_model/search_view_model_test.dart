@@ -10,7 +10,7 @@ import 'package:mockito/mockito.dart';
 import 'helper.dart';
 import 'search_view_model_test.mocks.dart';
 
-@GenerateMocks([SearchUseCase, StateListener])
+@GenerateMocks([SearchUseCase])
 void main() {
   final mockUseCase = MockSearchUseCase();
 
@@ -104,56 +104,31 @@ void main() {
       state as SearchStateData;
       expect(state.hits, ["result1", "result2"]);
     });
-    test("Watch Stream (Failure)", () async {
-      final viewModel = SearchViewModel(mockUseCase);
-      when(mockUseCase.call(any)).thenAnswer((_) async {
-        return ["result1", "result2"];
-      });
 
-      // listen
-      final listener = MockStateListener();
-      viewModel.stream.listen(listener);
-
-      // test
-      await viewModel.search("keyword");
-
-      // At this moment, data-state not received in the listener yet.
-      // To verify all the state changes, it's needed to wait for a while.
-      // If any of the following comment-outed lines toggled, this test will pass.
-      // await Future<void>.delayed(const Duration(milliseconds: 100));
-      // await Future.microtask(() => null);
-
-      // verify
-      verify(mockUseCase.call("keyword")).called(1);
-      verifyInOrder([
-        listener.call(argThat(isA<SearchStateLoading>())),
-        listener.call(argThat(isA<SearchStateData>())),
-      ]);
-    });
     test("Watch Stream", () async {
       final viewModel = SearchViewModel(mockUseCase);
       when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
       });
 
-      // listen
-      final listener = MockStateListener();
-      viewModel.stream.listen(listener);
+      final verifyStream = expectLater(
+        viewModel.stream,
+        emitsInOrder([
+          isA<SearchStateLoading>()
+              .having((s) => s.keyword, "keyword", "keyword")
+              .having((s) => s.previousHits.isEmpty, "previousHits", isTrue),
+          isA<SearchStateData>()
+              .having((s) => s.hits, "hits", ["result1", "result2"]),
+        ]),
+      );
 
       // test
-      viewModel.search("keyword");
-      // wait until all state changes received in the listener
-      await viewModel.waitUntil<SearchStateData>();
+      await viewModel.search("keyword");
 
       // verify
       verify(mockUseCase.call("keyword")).called(1);
-      verifyInOrder([
-        listener.call(argThat(isA<SearchStateLoading>()
-            .having((s) => s.keyword, "keyword", "keyword")
-            .having((s) => s.previousHits.isEmpty, "previousHits", isTrue))),
-        listener.call(argThat(isA<SearchStateData>()
-            .having((s) => s.hits, "hits", ["result1", "result2"]))),
-      ]);
+      await verifyStream;
     });
+
   });
 }
