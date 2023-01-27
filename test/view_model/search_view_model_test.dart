@@ -4,13 +4,18 @@ import 'package:async_test_sample/domain/usecase/search_usecase.dart';
 import 'package:async_test_sample/ui/search/search_state.dart';
 import 'package:async_test_sample/ui/search/search_view_model.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'helper.dart';
 import 'search_view_model_test.mocks.dart';
 
-@GenerateMocks([SearchUseCase])
+abstract class ChangeListener {
+  void call(SearchState? previous, SearchState next);
+}
+
+@GenerateMocks([SearchUseCase, ChangeListener])
 void main() {
   final mockUseCase = MockSearchUseCase();
 
@@ -130,5 +135,46 @@ void main() {
       await verifyStream;
     });
 
+    test("Listen Container", () async {
+      final container = ProviderContainer(
+        overrides: [
+          searchUseCaseProvider.overrideWithValue(mockUseCase),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      when(mockUseCase.call(any)).thenAnswer((_) async {
+        return ["result1", "result2"];
+      });
+
+      // listen
+      final listener = MockChangeListener();
+      container.listen(
+        searchViewModelProvider,
+        listener,
+        fireImmediately: true,
+      );
+
+      // test
+      final viewModel = container.read(searchViewModelProvider.notifier);
+      await viewModel.search("keyword");
+
+      // verify
+      verifyInOrder([
+        listener.call(argThat(isNull), argThat(isA<SearchStateEmpty>())),
+        listener.call(
+          argThat(isA<SearchStateEmpty>()),
+          argThat(isA<SearchStateLoading>()
+              .having((s) => s.keyword, "keyword", "keyword")
+              .having((s) => s.previousHits.isEmpty, "previousHits", isTrue)),
+        ),
+        listener.call(
+          argThat(isA<SearchStateLoading>()),
+          argThat(isA<SearchStateData>()
+              .having((s) => s.hits, "hits", ["result1", "result2"])),
+        ),
+      ]);
+      verify(mockUseCase.call("keyword")).called(1);
+    });
   });
 }
