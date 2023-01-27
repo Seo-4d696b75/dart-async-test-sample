@@ -25,7 +25,7 @@ void main() {
       // The mocked should be reset everytime, so that other tests not affected.
       reset(mockUseCase);
     });
-    test("Failure 1", () async {
+    test("1. Failure", () async {
       final viewModel = SearchViewModel(mockUseCase);
       expect(viewModel.debugState, isA<SearchStateEmpty>());
       when(mockUseCase.call(any)).thenAnswer((_) async {
@@ -39,7 +39,7 @@ void main() {
       verify(mockUseCase.call("keyword")).called(1);
       expect(viewModel.debugState, isA<SearchStateData>());
     });
-    test("Failure 2", () async {
+    test("2. Failure", () async {
       final viewModel = SearchViewModel(mockUseCase);
       when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
@@ -52,7 +52,7 @@ void main() {
       // Search operation has NOT done yet and the current is still loading-state.
       expect(viewModel.debugState, isA<SearchStateData>()); // Error
     });
-    test("Ambiguous Delay", () async {
+    test("3. Ambiguous Delay (Not Recommended)", () async {
       final viewModel = SearchViewModel(mockUseCase);
       when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
@@ -66,7 +66,7 @@ void main() {
       verify(mockUseCase.call("keyword")).called(1);
       expect(viewModel.debugState, isA<SearchStateData>());
     });
-    test("Wait for Async Operation 1", () async {
+    test("4. Wait for Async Operation using Completer", () async {
       final viewModel = SearchViewModel(mockUseCase);
       final searchCompleter = Completer<List<String>>();
       when(mockUseCase.call(any)).thenAnswer(
@@ -89,7 +89,7 @@ void main() {
       state as SearchStateData;
       expect(state.hits, ["result1", "result2"]);
     });
-    test("Wait for Async Operation 2", () async {
+    test("5. Wait for Async Operation by watching Stream", () async {
       final viewModel = SearchViewModel(mockUseCase);
       when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
@@ -110,7 +110,7 @@ void main() {
       expect(state.hits, ["result1", "result2"]);
     });
 
-    test("Watch Stream", () async {
+    test("6. Watch Stream", () async {
       final viewModel = SearchViewModel(mockUseCase);
       when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
@@ -135,7 +135,7 @@ void main() {
       await verifyStream;
     });
 
-    test("Listen Container", () async {
+    test("7. Listen Container", () async {
       final container = ProviderContainer(
         overrides: [
           searchUseCaseProvider.overrideWithValue(mockUseCase),

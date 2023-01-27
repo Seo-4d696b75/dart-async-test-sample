@@ -19,7 +19,7 @@ async test samples
 1. Put keyword string
 2. Tap "Search" button or "Next" button on the soft keyboard
 3. Progress indicator shown while searching
-4. Search resutls (string list) shown
+4. Search results (string list) shown
 
 ## Setup
 
