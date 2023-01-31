@@ -1,13 +1,12 @@
 import 'package:async_test_sample/ui/search/search_result_list.dart';
 import 'package:async_test_sample/ui/search/search_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SearchPage extends ConsumerWidget {
+class SearchPage extends StatelessWidget {
   const SearchPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("TestSampleApp"),
