@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:async_test_sample/domain/usecase/search_usecase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -8,8 +10,8 @@ class SearchViewModel extends _$SearchViewModel {
   SearchUseCase get searchWord => ref.read(searchUseCaseProvider);
 
   @override
-  FutureOr<List<String>> build() {
-    return _search("keyword");
+  FutureOr<List<String>> build() async {
+    return await searchWord("keyword");
   }
 
   Future<void> search(String keyword) async {
@@ -21,13 +23,9 @@ class SearchViewModel extends _$SearchViewModel {
     state = const AsyncLoading<List<String>>().copyWithPrevious(current);
 
     // 検索実行
-    final result = await AsyncValue.guard(() => _search(keyword));
+    final result = await AsyncValue.guard(() => searchWord(keyword));
     // 検索結果の反映
     // Error発生の直前に表示できるデータがあれば表示し続ける
     state = result.copyWithPrevious(current);
-  }
-
-  Future<List<String>> _search(String keyword) async {
-    return await searchWord(keyword);
   }
 }
