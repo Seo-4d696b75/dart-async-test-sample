@@ -1,44 +1,33 @@
 import 'package:async_test_sample/domain/usecase/search_usecase.dart';
-import 'package:async_test_sample/ui/search/search_state.dart';
-import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final searchViewModelProvider =
-    StateNotifierProvider.autoDispose<SearchViewModel, SearchState>(
-  (ref) => SearchViewModel(
-    ref.watch(searchUseCaseProvider),
-  ),
-);
+part 'search_view_model.g.dart';
 
-class SearchViewModel extends StateNotifier<SearchState> {
-  SearchViewModel(this.searchWord) : super(const SearchState.empty());
+@riverpod
+class SearchViewModel extends _$SearchViewModel {
+  SearchUseCase get searchWord => ref.read(searchUseCaseProvider);
 
-  final SearchUseCase searchWord;
+  @override
+  FutureOr<List<String>> build() {
+    return _search("keyword");
+  }
 
   Future<void> search(String keyword) async {
     final current = state;
     // 検索中はスキップ
     if (current.isLoading) return;
     // 検索中の状態
-    state = current.map(
-      empty: (_) => SearchState.loading(keyword: keyword, previousHits: []),
-      data: (s) => SearchState.loading(keyword: keyword, previousHits: s.hits),
-      loading: (_) => throw AssertionError(),
-    );
-    try {
-      // 検索実行
-      final result = await searchWord(keyword);
-      // 検索結果の反映
-      if (result.isEmpty) {
-        state = const SearchState.empty();
-      } else {
-        state = SearchState.data(hits: result);
-      }
-    } on Exception catch (e, stack) {
-      // エラーハンドリング
-      debugPrint(e.toString());
-      debugPrintStack(stackTrace: stack);
-      state = current;
-    }
+    // 直前の状態に表示できるデータがあれば表示し続ける
+    state = const AsyncLoading<List<String>>().copyWithPrevious(current);
+
+    // 検索実行
+    final result = await AsyncValue.guard(() => _search(keyword));
+    // 検索結果の反映
+    // Error発生の直前に表示できるデータがあれば表示し続ける
+    state = result.copyWithPrevious(current);
+  }
+
+  Future<List<String>> _search(String keyword) async {
+    return await searchWord(keyword);
   }
 }
