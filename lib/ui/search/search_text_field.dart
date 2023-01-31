@@ -8,10 +8,9 @@ class SearchTextField extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = useTextEditingController();
+    final controller = useTextEditingController(text: "keyword");
     onSubmit() {
       final keyword = controller.value.text;
-      debugPrint("keyword: $keyword");
       final viewModel = ref.read(searchViewModelProvider.notifier);
       viewModel.search(keyword);
     }
