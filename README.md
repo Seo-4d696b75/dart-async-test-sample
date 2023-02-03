@@ -1,20 +1,19 @@
 # async_test_sample
 
-async test samples
 
 **Feature**  
 - Unit test with async functions
 - Uses [Mockito](https://pub.dev/packages/mockito) for mocking dependencies
-- Immutable state by [freezed](https://pub.dev/packages/freezed)
-- Tests StateNotifier of [riverpod](https://riverpod.dev/)
+- Tests AsyncNotifier of [riverpod 2.0](https://riverpod.dev/)
 
-非同期処理のテストサンプル
+For testing StateNotifier, [please ses this branch.](https://github.com/Seo-4d696b75/dart-async-test-sample/tree/main)
 
-[解説記事](https://qiita.com/Seo-4d696b75/private/b677999b4a82fcda11dd)
+非同期処理のテストサンプルです（[解説記事](https://qiita.com/drafts/eee020162d0537fdbc36)）。
+StateNotifierのテストは[こちらのブランチにあります。](https://github.com/Seo-4d696b75/dart-async-test-sample/tree/main)
 
 ## App to be Tested
 
-<img src="https://user-images.githubusercontent.com/25225028/207562903-57e75115-3989-45c0-8401-404cdf444063.gif" width="300">
+<img src="https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/440643/e6a6c293-0845-3d28-0164-dd1903266347.gif" width="300">
 
 1. Put keyword string
 2. Tap "Search" button or "Next" button on the soft keyboard
@@ -26,7 +25,7 @@ async test samples
 ### 0. Install Flutter (if needed)
 
 This project uses fvm. 
-After installing, be sure to set "${projectRoot}/.fvm/flutter_sdk" to Flutter SDK path in your IDE.
+After installing, be sure to set "${projectRoot}/.fvm/flutter_sdk" as Flutter SDK path in your IDE.
 
 `fvm install`
 
@@ -42,5 +41,4 @@ After installing, be sure to set "${projectRoot}/.fvm/flutter_sdk" to Flutter SD
 
 `fvm flutter test`
 
-Some tests fail, while others get passed. 
 [Please see test codes for more details.](./test/view_model/search_view_model_test.dart)
