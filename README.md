@@ -8,7 +8,7 @@
 
 For testing StateNotifier, [please ses this branch.](https://github.com/Seo-4d696b75/dart-async-test-sample/tree/main)
 
-非同期処理のテストサンプルです（[解説記事](https://qiita.com/drafts/eee020162d0537fdbc36)）。
+非同期処理のテストサンプルです（[解説記事](https://qiita.com/Seo-4d696b75/items/eee020162d0537fdbc36)）。
 StateNotifierのテストは[こちらのブランチにあります。](https://github.com/Seo-4d696b75/dart-async-test-sample/tree/main)
 
 ## App to be Tested
