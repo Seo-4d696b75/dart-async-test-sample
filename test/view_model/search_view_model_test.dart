@@ -8,7 +8,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'helper.dart';
 import 'search_view_model_test.mocks.dart';
 
 abstract class ChangeListener {
@@ -52,7 +51,7 @@ void main() {
       // Search operation has NOT done yet and the current is still loading-state.
       expect(viewModel.debugState, isA<SearchStateData>()); // Error
     });
-    test("3. Ambiguous Delay (Not Recommended)", () async {
+    test("3. Ambiguous Delay (Should be avoided)", () async {
       final viewModel = SearchViewModel(mockUseCase);
       when(mockUseCase.call(any)).thenAnswer((_) async {
         return ["result1", "result2"];
@@ -66,76 +65,44 @@ void main() {
       verify(mockUseCase.call("keyword")).called(1);
       expect(viewModel.debugState, isA<SearchStateData>());
     });
-    test("4. Wait for Async Operation using Completer", () async {
-      final viewModel = SearchViewModel(mockUseCase);
-      final searchCompleter = Completer<List<String>>();
-      when(mockUseCase.call(any)).thenAnswer(
-        // calling this will NOT return until the completer has been completed
-        (_) => searchCompleter.future,
+    test("4. Read ProviderContainer", () async {
+      final container = ProviderContainer(
+        overrides: [
+          searchUseCaseProvider.overrideWithValue(mockUseCase),
+        ],
       );
+      addTearDown(container.dispose);
+
+      when(mockUseCase.call(any)).thenAnswer((_) async {
+        return ["result1", "result2"];
+      });
+
+      final subscription = container.listen(
+        searchViewModelProvider,
+        (_, __) {},
+      );
+      final viewModel = container.read(searchViewModelProvider.notifier);
 
       // test
       final searchCall = viewModel.search("keyword");
-      expect(viewModel.debugState, isA<SearchStateLoading>());
+      expect(
+        subscription.read(),
+        isA<SearchStateLoading>(),
+      );
 
       // complete
-      searchCompleter.complete(["result1", "result2"]);
       await searchCall;
 
       // verify
       verify(mockUseCase.call("keyword")).called(1);
-      final state = viewModel.debugState;
-      expect(state, isA<SearchStateData>());
-      state as SearchStateData;
-      expect(state.hits, ["result1", "result2"]);
-    });
-    test("5. Wait for Async Operation by watching Stream", () async {
-      final viewModel = SearchViewModel(mockUseCase);
-      when(mockUseCase.call(any)).thenAnswer((_) async {
-        return ["result1", "result2"];
-      });
-
-      // test
-      viewModel.search("keyword");
-      expect(viewModel.debugState, isA<SearchStateLoading>());
-
-      // wait until data-state is received from StateNotifier#stream
-      await viewModel.waitUntil<SearchStateData>();
-
-      // verify
-      verify(mockUseCase.call("keyword")).called(1);
-      final state = viewModel.debugState;
+      final state = subscription.read();
       expect(state, isA<SearchStateData>());
       state as SearchStateData;
       expect(state.hits, ["result1", "result2"]);
     });
 
-    test("6. Watch Stream", () async {
-      final viewModel = SearchViewModel(mockUseCase);
-      when(mockUseCase.call(any)).thenAnswer((_) async {
-        return ["result1", "result2"];
-      });
 
-      final verifyStream = expectLater(
-        viewModel.stream,
-        emitsInOrder([
-          isA<SearchStateLoading>()
-              .having((s) => s.keyword, "keyword", "keyword")
-              .having((s) => s.previousHits.isEmpty, "previousHits", isTrue),
-          isA<SearchStateData>()
-              .having((s) => s.hits, "hits", ["result1", "result2"]),
-        ]),
-      );
-
-      // test
-      await viewModel.search("keyword");
-
-      // verify
-      verify(mockUseCase.call("keyword")).called(1);
-      await verifyStream;
-    });
-
-    test("7. Listen Container", () async {
+    test("6. Listen ProviderContainer", () async {
       final container = ProviderContainer(
         overrides: [
           searchUseCaseProvider.overrideWithValue(mockUseCase),
@@ -175,6 +142,31 @@ void main() {
         ),
       ]);
       verify(mockUseCase.call("keyword")).called(1);
+    });
+
+    test("7. Watch Stream", () async {
+      final viewModel = SearchViewModel(mockUseCase);
+      when(mockUseCase.call(any)).thenAnswer((_) async {
+        return ["result1", "result2"];
+      });
+
+      final verifyStream = expectLater(
+        viewModel.stream,
+        emitsInOrder([
+          isA<SearchStateLoading>()
+              .having((s) => s.keyword, "keyword", "keyword")
+              .having((s) => s.previousHits.isEmpty, "previousHits", isTrue),
+          isA<SearchStateData>()
+              .having((s) => s.hits, "hits", ["result1", "result2"]),
+        ]),
+      );
+
+      // test
+      await viewModel.search("keyword");
+
+      // verify
+      verify(mockUseCase.call("keyword")).called(1);
+      await verifyStream;
     });
   });
 }
