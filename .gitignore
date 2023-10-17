@@ -47,6 +47,7 @@ app.*.map.json
 
 # Auto generated code
 /lib/**/*.freezed.dart
+/lib/**/*.g.dart
 /test/**/*.mocks.dart
 
 # fvm
