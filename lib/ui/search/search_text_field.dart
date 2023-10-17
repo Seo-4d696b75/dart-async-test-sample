@@ -1,4 +1,4 @@
-import 'package:async_test_sample/ui/search/search_view_model.dart';
+import 'package:async_test_sample/ui/search/search_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -11,8 +11,7 @@ class SearchTextField extends HookConsumerWidget {
     final controller = useTextEditingController(text: "keyword");
     onSubmit() {
       final keyword = controller.value.text;
-      final viewModel = ref.read(searchViewModelProvider.notifier);
-      viewModel.search(keyword);
+      ref.read(searchWordProvider.notifier).state = keyword;
     }
 
     return IntrinsicHeight(
