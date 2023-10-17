@@ -41,4 +41,4 @@ After installing, be sure to set "${projectRoot}/.fvm/flutter_sdk" as Flutter SD
 
 `fvm flutter test`
 
-[Please see test codes for more details.](./test/view_model/search_view_model_test.dart)
+[Please see test codes for more details.](./test/provider/search_result_test.dart)
