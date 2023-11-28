@@ -1,0 +1,24 @@
+appId: com.example.async_test_sample
+---
+- launchApp
+- waitForAnimationToEnd
+- assertVisible: "No Result"
+- tapOn: "Put keyword"
+- eraseText
+- inputText: "error"
+- tapOn: "Search"
+- waitForAnimationToEnd
+- assertVisible: "Error"
+- eraseText
+- inputText: "hoge"
+- tapOn: "Search"
+- waitForAnimationToEnd
+- assertVisible: "piyo"
+- eraseText
+- inputText: "more"
+- tapOn: "Search"
+- waitForAnimationToEnd
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "20"
