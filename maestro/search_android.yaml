@@ -1,0 +1,4 @@
+appId: com.example.async_test_sample
+---
+- launchApp
+- runFlow: search.yaml

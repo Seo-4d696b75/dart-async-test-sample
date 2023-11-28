@@ -1,6 +1,5 @@
-appId: com.example.async_test_sample
+appId: none
 ---
-- launchApp
 - waitForAnimationToEnd
 - assertVisible: "No Result"
 - tapOn: "Put keyword"
