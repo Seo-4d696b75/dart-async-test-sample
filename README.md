@@ -1,7 +1,16 @@
 # async_test_sample
 
 
-An example of UI test with [Maestro](https://maestro.mobile.dev/). More details are described in [an Qiita article (japanese)]().
+An example of UI test with [Maestro](https://maestro.mobile.dev/).
+
+- Compatible with both mobile platforms:
+  - Android
+  - iOS (simulator only)
+- Flows of Maestro test are defined here:
+  - [common test flow](./maestro/search.yaml) 
+  - [Android](./maestro/search_android.yaml)
+  - [iOS](./maestro/search_ios.yaml)
+- Details are described in [a Qiita article (japanese)](https://qiita.com/Seo-4d696b75/items/dadd62fab4545b7fad58).
 
 For unit test, [please ses this branch.](https://github.com/Seo-4d696b75/dart-async-test-sample/tree/riverpod2)
 
