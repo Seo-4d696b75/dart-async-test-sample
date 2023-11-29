@@ -1,24 +1,9 @@
 # async_test_sample
 
 
-**Feature**  
-- Unit test with async functions
-- Uses [Mockito](https://pub.dev/packages/mockito) for mocking dependencies
-- Tests AsyncNotifier of [riverpod 2.0](https://riverpod.dev/)
+An example of UI test with [Maestro](https://maestro.mobile.dev/). More details are described in [an Qiita article (japanese)]().
 
-For testing StateNotifier, [please ses this branch.](https://github.com/Seo-4d696b75/dart-async-test-sample/tree/main)
-
-非同期処理のテストサンプルです（[解説記事](https://qiita.com/Seo-4d696b75/items/eee020162d0537fdbc36)）。
-StateNotifierのテストは[こちらのブランチにあります。](https://github.com/Seo-4d696b75/dart-async-test-sample/tree/main)
-
-## App to be Tested
-
-<img src="https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/440643/e6a6c293-0845-3d28-0164-dd1903266347.gif" width="300">
-
-1. Put keyword string
-2. Tap "Search" button or "Next" button on the soft keyboard
-3. Progress indicator shown while searching
-4. Search results (string list) shown
+For unit test, [please ses this branch.](https://github.com/Seo-4d696b75/dart-async-test-sample/tree/riverpod2)
 
 ## Setup
 
@@ -37,8 +22,31 @@ After installing, be sure to set "${projectRoot}/.fvm/flutter_sdk" as Flutter SD
 
 `fvm flutter pub run build_runner build`
 
+
+### 3. Build & Install
+
+**Be sure to use mock build**
+
+```bash
+# Android
+fvm flutter build apk --debug -t lib/main_mock.dart
+adb install build/app/outputs/flutter-apk/app-debug.apk
+# iOS
+fvm flutter build ios --debug --simulator -t lib/main_mock.dart
+xcrun simctl install ${device} build/ios/iphonesimulator/Runner.app
+```
+
+### 4. Install Maestro
+
+[Please follow the official install guide](https://maestro.mobile.dev/getting-started/installing-maestro)
+
 ## Run Tests
 
-`fvm flutter test`
+```bash
+# Android
+maestro maestro/search_android.yaml
+# iOS
+maestro maestro/search_ios.yaml
+```
 
-[Please see test codes for more details.](./test/provider/search_result_test.dart)
+![maestro_sample_android.gif](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/440643/85200649-6a2f-bdd2-5369-7f9b9001e192.gif)
