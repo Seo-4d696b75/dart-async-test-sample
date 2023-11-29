@@ -53,9 +53,9 @@ xcrun simctl install ${device} build/ios/iphonesimulator/Runner.app
 
 ```bash
 # Android
-maestro maestro/search_android.yaml
+maestro test maestro/search_android.yaml
 # iOS
-maestro maestro/search_ios.yaml
+maestro test maestro/search_ios.yaml
 ```
 
 ![maestro_sample_android.gif](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/440643/85200649-6a2f-bdd2-5369-7f9b9001e192.gif)
